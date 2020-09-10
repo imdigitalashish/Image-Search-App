@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.android.volley.Request;
@@ -19,7 +20,13 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ItemAdapter.OnItemClickListener {
+
+
+    public static final String EXTRA_URL = "imageUrl";
+    public static final String EXTRA_CREATOR = "creatorName";
+    public static final String EXTRA_LIKES = "likeCount";
+
 
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
@@ -44,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void parseJSON() {
 
-        String url = "https://pixabay.com/api/?key=18254299-ce34038ed1f7ac36e83c8fd7b&q=python%20programming&image_type=photo&pretty=true";
+        String url = "https://pixabay.com/api/?key=18254299-ce34038ed1f7ac36e83c8fd7b&q="+getIntent().getStringExtra("SEARCH")+"&image_type=photo&pretty=true";
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -61,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
                             itemAdapter = new ItemAdapter(MainActivity.this, oneItems);
                             recyclerView.setAdapter(itemAdapter);
+                            itemAdapter.setOnItemClickListener(MainActivity.this);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -73,6 +81,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
         requestQueue.add(request);
+
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent detailIntent = new Intent(this, DetailActivity.class);
+        OneItem oneItem = oneItems.get(position);
+        detailIntent.putExtra(EXTRA_URL, oneItem.getmImageUrl());
+        detailIntent.putExtra(EXTRA_CREATOR, oneItem.getmCreator());
+        detailIntent.putExtra(EXTRA_LIKES, oneItem.getmLikes());
+        startActivity(detailIntent);
 
     }
 }
